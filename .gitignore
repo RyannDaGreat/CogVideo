@@ -8,3 +8,5 @@ logs/
 .idea
 output*
 test*
+models_huggingface/CogVideoX-5b
+datasets/Disney-VideoGeneration-Dataset
