@@ -2,7 +2,7 @@
 
 export MODEL_PATH="THUDM/CogVideoX-2b"
 export CACHE_PATH="~/.cache"
-export DATASET_PATH="Disney-VideoGeneration-Dataset"
+export DATASET_PATH="/root/CleanCode/Github/CogVideo/finetune/datasets/Disney-VideoGeneration-Dataset"
 export OUTPUT_PATH="cogvideox-lora-single-node"
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
