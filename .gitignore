@@ -8,5 +8,20 @@ logs/
 .idea
 output*
 test*
+
 models_huggingface/CogVideoX-5b
 datasets/Disney-VideoGeneration-Dataset
+finetune/cogvideox-lora-single-node
+finetune/datasets/Disney-VideoGeneration-Dataset
+finetune/wandb
+trash/models_huggingface/CogVideoX-5b
+
+
+#<RP Default Gitignore Start>
+*.pyc
+*.swo
+*.swp
+*.un~
+*.DS_Store
+#<RP Default Gitignore End>
+
