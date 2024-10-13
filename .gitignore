@@ -25,3 +25,5 @@ trash/models_huggingface/CogVideoX-5b
 *.DS_Store
 #<RP Default Gitignore End>
 
+*.safetensors
+*.mp4
