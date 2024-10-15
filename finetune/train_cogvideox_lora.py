@@ -46,6 +46,42 @@ from diffusers.utils import check_min_version, convert_unet_state_dict_to_peft, 
 from diffusers.utils.hub_utils import load_or_create_model_card, populate_model_card
 from diffusers.utils.torch_utils import is_compiled_module
 
+import rp
+rp.git_import("CommonSource")
+from icecream import ic
+import einops
+import sys
+
+sys.path.append("/root/CleanCode/Github/AnimateDiff_Ning/animatediff/data")
+import dataset as ds
+def get_sample(index):
+    sample = ds.get_sample_from_delegator(
+        index,
+        
+        sample_n_frames=49,
+        sample_size=(480, 720),
+        S=8,
+        F=9,
+        
+        delegator_timeout=None,
+        csv_path = '/fsx_scanline/from_eyeline/ning_video_genai/datasets/ryan/webvid/webvid_gpt4v_caption_2065605_clean.csv',
+    )
+    assert set(sample) <= set('text noise pixel_values'.split())
+
+    sample.noise = einops.rearrange(sample.noise, 'T H W C -> T C H W')
+    sample.noise = torch.Tensor(sample.noise)
+
+    print(f'get_sample({index}):')
+    print(f'    • text = {sample.text}')
+    print(f'    • noise.shape = {sample.noise.shape}')
+    print(f'    • pixel_values.shape = {sample.pixel_values.shape}')
+
+    return sample
+
+def test_get_sample():
+    sample = get_sample(123)
+    print(f'set(sample) = {set(sample)}')
+    return sample
 
 if is_wandb_available():
     import wandb
