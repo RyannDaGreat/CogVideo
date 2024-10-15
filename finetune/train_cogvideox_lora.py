@@ -425,6 +425,58 @@ class VideoDataset(Dataset):
     ) -> None:
         super().__init__()
 
+        ic(
+            instance_data_root,
+            dataset_name,
+            dataset_config_name,
+            caption_column,
+            video_column,
+            height,
+            width,
+            fps,
+            max_num_frames,
+            skip_frames_start,
+            skip_frames_end,
+            cache_dir,
+            id_token,
+        )
+        # rp.web_copy(
+        #     rp.gather_vars(
+        #         "instance_data_root",
+        #         "dataset_name",
+        #         "dataset_config_name",
+        #         "caption_column",
+        #         "video_column",
+        #         "height",
+        #         "width",
+        #         "fps",
+        #         "max_num_frames",
+        #         "skip_frames_start",
+        #         "skip_frames_end",
+        #         "cache_dir",
+        #         "id_token",
+        #     )
+        # )
+        #FOR TESTING:
+        # >>> import train_cogvideox_lora as tr
+        # ... d=tr.VideoDataset(
+        # ...     instance_data_root  = '/root/CleanCode/Github/CogVideo/finetune/datasets/Disney-VideoGeneration-Dataset',
+        # ...     dataset_name        = None,
+        # ...     dataset_config_name = None,
+        # ...     caption_column      = 'prompts.txt',
+        # ...     video_column        = 'videos.txt',
+        # ...     height              = 480,
+        # ...     width               = 720,
+        # ...     fps                 = 8,
+        # ...     max_num_frames      = 49,
+        # ...     skip_frames_start   = 0,
+        # ...     skip_frames_end     = 0,
+        # ...     cache_dir           = '~/.cache',
+        # ...     id_token            = None,
+        # ... )
+        # ... rinsp(d[123]) # -->  SHAPE: torch.Size([49, 3, 480, 720])   DTYPE: torch.float32   MEMORY: 193.8MB   DEVICE: cpu   min: -1.000000   max: 0.639216   mean: -0.367579
+
+
         self.instance_data_root = Path(instance_data_root) if instance_data_root is not None else None
         self.dataset_name = dataset_name
         self.dataset_config_name = dataset_config_name
