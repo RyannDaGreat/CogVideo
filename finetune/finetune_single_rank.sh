@@ -1,15 +1,20 @@
 #!/bin/bash
 
 export MODEL_PATH="THUDM/CogVideoX-2b"
+export OUTPUT_PATH="cogvideox-lora-single-node-delegator"
+
+# export MODEL_PATH="THUDM/CogVideoX-5b"
+# export OUTPUT_PATH="cogvideox5b-lora-single-node"
+
 export CACHE_PATH="~/.cache"
 export DATASET_PATH="/root/CleanCode/Github/CogVideo/finetune/datasets/Disney-VideoGeneration-Dataset"
-export OUTPUT_PATH="cogvideox-lora-single-node"
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
 # if you are not using wth 8 gus, change `accelerate_config_machine_single.yaml` num_processes as your gpu number
 accelerate launch --config_file accelerate_config_machine_single.yaml --multi_gpu \
   train_cogvideox_lora.py \
+  --dataloader_num_workers 4 \
   --gradient_checkpointing \
   --pretrained_model_name_or_path $MODEL_PATH \
   --cache_dir $CACHE_PATH \

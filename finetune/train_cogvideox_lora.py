@@ -92,7 +92,7 @@ def get_sample(index):
     print(f'    • instance_video.shape = {output.instance_video.shape}')
     print(f'    • instance_noise.shape = {output.instance_noise.shape}')
     
-    return sample
+    return output
 
 def test_get_sample():
     sample = get_sample(123)
@@ -560,16 +560,24 @@ class VideoDataset(Dataset):
         return self.num_instance_videos
 
     def __getitem__(self, index):
+        #ORIGINAL CODE:
+        # return {
+        #     "instance_prompt": self.id_token + self.instance_prompts[index],
+        #     "instance_video": self.instance_videos[index],
+        # }
 
-        # sample = get_sample(index)
-        # sample.instance_prompt = self.id_token + sample.instance_prompt 
+        # Using on-the-fly dataloader - NOTE with limited size right now!
+        while True:
+            try:
+                sample = get_sample(index)
+                sample.instance_prompt = self.id_token + sample.instance_prompt 
+                return sample
 
-        # return sample
+            except Exception:
+                rp.fansi_print('dataset.py: Entry %d has a broken loading' % index, 'red', 'bold')
+                rp.print_stack_trace()
+                index = rp.random_index(len(self))
 
-        return {
-            "instance_prompt": self.id_token + self.instance_prompts[index],
-            "instance_video": self.instance_videos[index],
-        }
 
     def _load_dataset_from_hub(self):
         try:
@@ -1292,20 +1300,23 @@ def main(args):
         id_token=args.id_token,
     )
 
+    @rp.memoized #Cache the encoded videos for now - but don't keep this forever or we'll run out of memory! 
     def encode_video(video):
+        rp.tic()
         video = video.to(accelerator.device, dtype=vae.dtype).unsqueeze(0)
         video = video.permute(0, 2, 1, 3, 4)  # [B, C, F, H, W]
         latent_dist = vae.encode(video).latent_dist
+        rp.ptoc()
         return latent_dist
 
-    train_dataset.instance_videos = [encode_video(video) for video in train_dataset.instance_videos]
+    # train_dataset.instance_videos = [encode_video(video) for video in train_dataset.instance_videos]
+    print("NOT ENCODING ALL VIDEOS BEFORE TRAINING - WILL TAKE ~3 ADDITIONAL SECONDS OF ENCODING PER ITERATION")
+    # We have millions of videos. We have to do this on the fly - right now I'll do it here. In the future it could be handled by the dataworkers.
+    # It takes about 3 seconds per video - which is quite substantial. This will half the training speed!
 
     def collate_fn(examples):
-        videos = [example["instance_video"].sample() * vae.config.scaling_factor for example in examples]
+        videos = [example["instance_video"] * vae.config.scaling_factor for example in examples]
         prompts = [example["instance_prompt"] for example in examples]
-
-        videos = torch.cat(videos)
-        videos = videos.to(memory_format=torch.contiguous_format).float()
 
         return {
             "videos": videos,
@@ -1426,6 +1437,18 @@ def main(args):
             models_to_accumulate = [transformer]
 
             with accelerator.accumulate(models_to_accumulate):
+
+                #RYAN: Encoding videos on-the-fly!
+                batch_videos = batch["videos"]
+                rp.local_copy(batch)
+                # print("BATCH SIZE:",len(batch_videos)) #BATCH SIZE is always 1.
+                batch_videos = [encode_video(video).sample() for video in batch_videos]
+                #From collate_fn
+                batch_videos = torch.cat(batch_videos)
+                batch_videos = batch_videos.to(memory_format=torch.contiguous_format).float()
+                #Put it back in
+                batch["videos"] = batch_videos
+
                 model_input = batch["videos"].permute(0, 2, 1, 3, 4).to(dtype=weight_dtype)  # [B, F, C, H, W]
                 prompts = batch["prompts"]
 
