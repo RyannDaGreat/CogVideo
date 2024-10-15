@@ -55,27 +55,43 @@ import sys
 sys.path.append("/root/CleanCode/Github/AnimateDiff_Ning/animatediff/data")
 import dataset as ds
 def get_sample(index):
+    print(f'CALLED get_sample({index})', flush=True)
+
     sample = ds.get_sample_from_delegator(
         index,
         
         sample_n_frames=49,
         sample_size=(480, 720),
-        S=8,
-        F=9,
+
+        #UNCOMMENT FOR HIGH QUALITY NOISE WARPING - MUST RUN ON 40GB SERVERS
+        # S=8,
+        # F=9,
         
         delegator_timeout=None,
         csv_path = '/fsx_scanline/from_eyeline/ning_video_genai/datasets/ryan/webvid/webvid_gpt4v_caption_2065605_clean.csv',
     )
     assert set(sample) <= set('text noise pixel_values'.split())
 
+    #Make sample/noise shapes compatible with CogVidX
     sample.noise = einops.rearrange(sample.noise, 'T H W C -> T C H W')
     sample.noise = torch.Tensor(sample.noise)
 
-    print(f'get_sample({index}):')
-    print(f'    • text = {sample.text}')
-    print(f'    • noise.shape = {sample.noise.shape}')
-    print(f'    • pixel_values.shape = {sample.pixel_values.shape}')
+    #Rename variables for CogVid's codebase
+    output = rp.as_easydict(
+        instance_prompt = sample.text,
+        instance_video = sample.pixel_values,
+        instance_noise = sample.noise,
+    )
 
+    #Modify this as you code - for clarity.
+    assert set('instance_noise instance_video instance_prompt'.split()) == set(output)
+
+    #For debugging
+    print(f'get_sample({index}):')
+    print(f'    • instance_prompt = {output.instance_prompt}')
+    print(f'    • instance_video.shape = {output.instance_video.shape}')
+    print(f'    • instance_noise.shape = {output.instance_noise.shape}')
+    
     return sample
 
 def test_get_sample():
@@ -544,6 +560,12 @@ class VideoDataset(Dataset):
         return self.num_instance_videos
 
     def __getitem__(self, index):
+
+        # sample = get_sample(index)
+        # sample.instance_prompt = self.id_token + sample.instance_prompt 
+
+        # return sample
+
         return {
             "instance_prompt": self.id_token + self.instance_prompts[index],
             "instance_video": self.instance_videos[index],
@@ -1252,6 +1274,7 @@ def main(args):
 
     optimizer = get_optimizer(args, params_to_optimize, use_deepspeed=use_deepspeed_optimizer)
 
+    #LOOK HERE!!!
     # Dataset and DataLoader
     train_dataset = VideoDataset(
         instance_data_root=args.instance_data_root,
