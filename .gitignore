@@ -27,3 +27,4 @@ trash/models_huggingface/CogVideoX-5b
 
 *.safetensors
 *.mp4
+finetune/cogvideox2b-lora-single-node-delegator-noisewarp-Oct15
