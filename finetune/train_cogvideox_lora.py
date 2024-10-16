@@ -61,6 +61,8 @@ import dataset as ds
 
 
 def get_sample_helper(index, debug=False):
+    rp.sleep(rp.random_int(1)) #Space them out to prevent errors? Idk....connection reset bs...maybe the webevaluator delegation server can be overloaded by too many requests at a time and just hangs up? I've never tested that??
+
     if 1 or debug:
         print(f'CALLED get_sample({index})', flush=True)
 
@@ -69,7 +71,7 @@ def get_sample_helper(index, debug=False):
     sample = ds.get_sample_from_delegator(
         index,
 
-        delegator_address='100.113.101.107', #videotrainer80gb
+        delegator_address='100.113.102.120', #videotrainer80gb
         
         sample_n_frames=49,
         sample_size=(480, 720),
@@ -81,6 +83,10 @@ def get_sample_helper(index, debug=False):
         #CHEAP - can run two per-40GB gpu
         S=8,
         F=5,
+
+        # #DIRT CHEAP - for testing only
+        # S=8,
+        # F=3,
 
         noise_channels=16,
 
@@ -128,8 +134,10 @@ def get_sample(index=None):
             output = next(get_sample_iterator)
 
             if isinstance(output, Exception):
+                print("get_sample(): RAISED AN ERROR!")
                 raise output
             else:
+                print("get_sample(): GOT AN OUTPUT!")
                 return output
 
         except Exception:
@@ -623,6 +631,7 @@ class VideoDataset(Dataset):
             try:
                 sample = get_sample(index)
                 sample.instance_prompt = self.id_token + sample.instance_prompt 
+                print("RETURNING SAMPLE!")
                 return sample
 
             except Exception:
@@ -1224,10 +1233,15 @@ def main(args):
         raise ValueError(
             "Mixed precision training with bfloat16 is not supported on MPS. Please use fp16 (recommended) or fp32 instead."
         )
+    
+    rp.fansi_print(f"SOON TO USE GPU AT {accelerator.device}",'green')
 
     text_encoder.to(accelerator.device, dtype=weight_dtype)
     transformer.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
+
+    rp.fansi_print("SHOULD BE USING GPU NOW",'green')
+
 
     if args.gradient_checkpointing:
         transformer.enable_gradient_checkpointing()
