@@ -13,6 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+EXTRA_VALIDATION_EPOCHS = [2, 10, 20, 50] #Additional validations here. Don't use epoch 0 - I want to see if there are errors in training.
+EXTRA_VALIDATION_EPOCHS = [] #Additional validations here. Don't use epoch 0 - I want to see if there are errors in training.
+
 import argparse
 import logging
 import math
@@ -54,7 +58,7 @@ import sys
 
 sys.path.append("/root/CleanCode/Github/AnimateDiff_Ning/animatediff/data")
 import dataset as ds
-def get_sample(index):
+def get_sample(index, debug=False):
     print(f'CALLED get_sample({index})', flush=True)
 
     index = None #Choose a completely random sample from the delegator! I don't care about epoch perfection
@@ -65,10 +69,18 @@ def get_sample(index):
         sample_n_frames=49,
         sample_size=(480, 720),
 
-        #UNCOMMENT FOR HIGH QUALITY NOISE WARPING - MUST RUN ON 40GB SERVERS
+        # #UNCOMMENT FOR HIGH QUALITY NOISE WARPING - MUST RUN ON 40GB SERVERS
         # S=8,
         # F=7,
+
+        #CHEAP
+        S=8,
+        F=3,
+
         noise_channels=16,
+
+        # post_noise_alpha = rp.random_float(),
+        post_noise_alpha = 0,
         
         delegator_timeout=None,
         csv_path = '/fsx_scanline/from_eyeline/ning_video_genai/datasets/ryan/webvid/webvid_gpt4v_caption_2065605_clean.csv',
@@ -89,11 +101,12 @@ def get_sample(index):
     #Modify this as you code - for clarity.
     assert set('instance_noise instance_video instance_prompt'.split()) == set(output)
 
-    #For debugging
-    print(f'get_sample({index}):')
-    print(f'    • instance_prompt = {output.instance_prompt}')
-    print(f'    • instance_video.shape = {output.instance_video.shape}')
-    print(f'    • instance_noise.shape = {output.instance_noise.shape}')
+    if debug:
+        #For debugging
+        print(f'get_sample({index}):')
+        print(f'    • instance_prompt = {output.instance_prompt}')
+        print(f'    • instance_video.shape = {output.instance_video.shape}')
+        print(f'    • instance_noise.shape = {output.instance_noise.shape}')
     
     return output
 
@@ -1586,7 +1599,11 @@ def main(args):
                 break
 
         if accelerator.is_main_process:
-            if args.validation_prompt is not None and (epoch + 1) % args.validation_epochs == 0:
+            if (
+                args.validation_prompt is not None
+                and (epoch + 1) % args.validation_epochs == 0
+                or epoch in EXTRA_VALIDATION_EPOCHS
+            ):
                 # Create pipeline
                 pipe = CogVideoXPipeline.from_pretrained(
                     args.pretrained_model_name_or_path,
