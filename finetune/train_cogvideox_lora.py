@@ -61,7 +61,8 @@ import dataset as ds
 
 
 def get_sample_helper(index, debug=False):
-    print(f'CALLED get_sample({index})', flush=True)
+    if 1 or debug:
+        print(f'CALLED get_sample({index})', flush=True)
 
     index = None #Choose a completely random sample from the delegator! I don't care about epoch perfection
 
@@ -77,14 +78,14 @@ def get_sample_helper(index, debug=False):
         # S=8,
         # F=7,
 
-        #CHEAP
+        #CHEAP - can run two per-40GB gpu
         S=8,
-        F=3,
+        F=5,
 
         noise_channels=16,
 
         # post_noise_alpha = rp.random_float(),
-        post_noise_alpha = 0,
+        post_noise_alpha = 0, #LORA doesn't seem to be super affected by training...so I'll go as harsh as I can.
         
         delegator_timeout=None,
         csv_path = '/fsx_scanline/from_eyeline/ning_video_genai/datasets/ryan/webvid/webvid_gpt4v_caption_2065605_clean.csv',

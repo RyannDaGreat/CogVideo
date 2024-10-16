@@ -1,10 +1,10 @@
-#!/bin/bash
+export OUTPUT_SUFFIX="-lora-single-node-delegator-noisewarp-Oct15"
 
 export MODEL_PATH="THUDM/CogVideoX-2b"
-export OUTPUT_PATH="cogvideox2b-lora-single-node-delegator-noisewarp"
+export OUTPUT_PATH="cogvideox2b$OUTPUT_SUFFIX"
 
-# export MODEL_PATH="THUDM/CogVideoX-5b"
-# export OUTPUT_PATH="cogvideox5b-lora-single-node-delegator-noisewarp"
+# export MODEL_PATH="THUDM/CogVideoX-5b" 
+# export OUTPUT_PATH="cogvideox5b$OUTPUT_SUFFIX"
 
 export CACHE_PATH="~/.cache"
 # export DATASET_PATH="/root/CleanCode/Github/CogVideo/finetune/datasets/Disney-VideoGeneration-Dataset"
