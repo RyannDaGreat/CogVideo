@@ -67,6 +67,8 @@ def get_sample_helper(index, debug=False):
 
     sample = ds.get_sample_from_delegator(
         index,
+
+        delegator_address='100.113.101.107', #videotrainer80gb
         
         sample_n_frames=49,
         sample_size=(480, 720),
