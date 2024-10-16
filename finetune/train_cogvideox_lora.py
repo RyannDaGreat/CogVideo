@@ -57,6 +57,8 @@ import dataset as ds
 def get_sample(index):
     print(f'CALLED get_sample({index})', flush=True)
 
+    index = None #Choose a completely random sample from the delegator! I don't care about epoch perfection
+
     sample = ds.get_sample_from_delegator(
         index,
         
@@ -65,7 +67,8 @@ def get_sample(index):
 
         #UNCOMMENT FOR HIGH QUALITY NOISE WARPING - MUST RUN ON 40GB SERVERS
         # S=8,
-        # F=9,
+        # F=7,
+        noise_channels=16,
         
         delegator_timeout=None,
         csv_path = '/fsx_scanline/from_eyeline/ning_video_genai/datasets/ryan/webvid/webvid_gpt4v_caption_2065605_clean.csv',
@@ -1317,10 +1320,12 @@ def main(args):
     def collate_fn(examples):
         videos = [example["instance_video"] * vae.config.scaling_factor for example in examples]
         prompts = [example["instance_prompt"] for example in examples]
+        noises = [example["instance_noise"] for example in examples]
 
         return {
             "videos": videos,
             "prompts": prompts,
+            "noises": noises,
         }
 
     train_dataloader = DataLoader(
@@ -1452,6 +1457,19 @@ def main(args):
                 model_input = batch["videos"].permute(0, 2, 1, 3, 4).to(dtype=weight_dtype)  # [B, F, C, H, W]
                 prompts = batch["prompts"]
 
+                #Get noises from the batch
+                batch_noises=batch['noises']
+                batch_noises=torch.cat(batch_noises)
+                # ...
+                # ic(model_input.shape, batch_noises.shape)
+                # # ic| model_input.shape: torch.Size([1, 13, 16, 60, 90])
+                # #     batch_noises.shape: torch.Size([49, 16, 60, 90])
+                # ...
+                batch_noises = rp.resize_list(batch_noises, model_input.shape[1])
+                batch_noises = einops.rearrange(batch_noises, 'T H W C -> 1 T H W C')
+                batch_noises = batch_noises.to(model_input.dtype).to(model_input.device)
+                assert batch_noises.shape==model_input.shape, (batch_noises.shape, model_input.shape) 
+
                 # encode prompts
                 prompt_embeds = compute_prompt_embeddings(
                     tokenizer,
@@ -1464,8 +1482,14 @@ def main(args):
                 )
 
                 # Sample noise that will be added to the latents
-                noise = torch.randn_like(model_input)
-                batch_size, num_frames, num_channels, height, width = model_input.shape
+                
+                # noise = torch.randn_like(model_input)
+                noise = batch_noises
+
+                ################################## TODO: Tweak this line and you're done!
+                # (also 16 channels and random degredation)
+
+                batch_size, num_frames, num_channels, height, width = model_input.shape 
 
                 # Sample a random timestep for each image
                 timesteps = torch.randint(

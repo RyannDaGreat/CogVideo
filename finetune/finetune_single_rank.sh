@@ -1,10 +1,10 @@
 #!/bin/bash
 
-export MODEL_PATH="THUDM/CogVideoX-2b"
-export OUTPUT_PATH="cogvideox-lora-single-node-delegator"
+# export MODEL_PATH="THUDM/CogVideoX-2b"
+# export OUTPUT_PATH="cogvideox-lora-single-node-delegator"
 
-# export MODEL_PATH="THUDM/CogVideoX-5b"
-# export OUTPUT_PATH="cogvideox5b-lora-single-node"
+export MODEL_PATH="THUDM/CogVideoX-5b"
+export OUTPUT_PATH="cogvideox5b-lora-single-node-delegator"
 
 export CACHE_PATH="~/.cache"
 export DATASET_PATH="/root/CleanCode/Github/CogVideo/finetune/datasets/Disney-VideoGeneration-Dataset"
