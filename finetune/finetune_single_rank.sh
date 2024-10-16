@@ -15,9 +15,10 @@ export CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 # if you are not using wth 8 gus, change `accelerate_config_machine_single.yaml` num_processes as your gpu number
 accelerate launch --config_file accelerate_config_machine_single.yaml --multi_gpu \
   train_cogvideox_lora.py \
-  --num_train_epochs 300 \
-  --checkpointing_steps 1000 \
+  --num_train_epochs 3000 \
+  --checkpointing_steps 200 \
   --dataloader_num_workers 0 \
+  --rank 128 \
   --gradient_checkpointing \
   --pretrained_model_name_or_path $MODEL_PATH \
   --cache_dir $CACHE_PATH \
@@ -31,7 +32,6 @@ accelerate launch --config_file accelerate_config_machine_single.yaml --multi_gp
   --num_validation_videos 1 \
   --validation_epochs 100 \
   --seed 42 \
-  --rank 128 \
   --lora_alpha 64 \
   --mixed_precision bf16 \
   --output_dir $OUTPUT_PATH \
