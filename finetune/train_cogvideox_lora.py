@@ -1352,7 +1352,7 @@ def main(args):
         id_token=args.id_token,
     )
 
-    @rp.memoized #Cache the encoded videos for now - but don't keep this forever or we'll run out of memory! 
+    # @rp.memoized #Cache the encoded videos for now - but don't keep this forever or we'll run out of memory! 
     def encode_video(video):
         rp.tic()
         video = video.to(accelerator.device, dtype=vae.dtype).unsqueeze(0)
