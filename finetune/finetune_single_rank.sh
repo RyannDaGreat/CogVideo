@@ -6,18 +6,30 @@ export OUTPUT_PATH="cogvideox2b$OUTPUT_SUFFIX"
 # export MODEL_PATH="THUDM/CogVideoX-5b" 
 # export OUTPUT_PATH="cogvideox5b$OUTPUT_SUFFIX"
 
-export CACHE_PATH="~/.cache"
 # export DATASET_PATH="/root/CleanCode/Github/CogVideo/finetune/datasets/Disney-VideoGeneration-Dataset"
 export DATASET_PATH="/root/CleanCode/Github/CogVideo/finetune/datasets/Single-Sample-Disney-VideoGeneration-Dataset"
+
+#DEFAULT VALUES:
+export RANK=128
+export LORA_ALPHA=64
+
+#(LORA_ALPHA / RANK) = the lora's strength on a scale from 0 to 1
+#https://datascience.stackexchange.com/questions/123229/understanding-alpha-parameter-tuning-in-lora-paper
+export RANK=512
+export LORA_ALPHA=512
+
+#Idk what these do
+export CACHE_PATH="~/.cache"
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # if you are not using wth 8 gus, change `accelerate_config_machine_single.yaml` num_processes as your gpu number
 accelerate launch --config_file accelerate_config_machine_single.yaml --multi_gpu \
   train_cogvideox_lora.py \
-  --num_train_epochs 3000 \
+  --num_train_epochs 30000 \
   --checkpointing_steps 200 \
   --dataloader_num_workers 0 \
-  --rank 128 \
+  --rank $RANK \
+  --lora_alpha $LORA_ALPHA \
   --gradient_checkpointing \
   --pretrained_model_name_or_path $MODEL_PATH \
   --cache_dir $CACHE_PATH \
@@ -31,7 +43,6 @@ accelerate launch --config_file accelerate_config_machine_single.yaml --multi_gp
   --num_validation_videos 1 \
   --validation_epochs 100 \
   --seed 42 \
-  --lora_alpha 64 \
   --mixed_precision bf16 \
   --output_dir $OUTPUT_PATH \
   --height 480 \
