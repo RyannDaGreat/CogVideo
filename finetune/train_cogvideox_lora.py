@@ -58,7 +58,9 @@ import sys
 
 sys.path.append("/root/CleanCode/Github/AnimateDiff_Ning/animatediff/data")
 import dataset as ds
-def get_sample(index, debug=False):
+
+
+def get_sample_helper(index, debug=False):
     print(f'CALLED get_sample({index})', flush=True)
 
     index = None #Choose a completely random sample from the delegator! I don't care about epoch perfection
@@ -109,6 +111,37 @@ def get_sample(index, debug=False):
         print(f'    • instance_noise.shape = {output.instance_noise.shape}')
     
     return output
+
+get_sample_iterator = rp.lazy_par_map(
+    rp.squelch_wrap(get_sample_helper),
+    [None] * 100000000,
+    num_threads=10,
+    buffer_limit=10,
+)
+
+def get_sample(index=None):
+    while True:
+        try:
+            output = next(get_sample_iterator)
+
+            if isinstance(output, Exception):
+                raise output
+            else:
+                return output
+
+        except Exception:
+            print("get_sample error:")
+            rp.print_stack_trace()
+            rp.sleep(1)
+
+# next(get_sample_iterator)
+# next(get_sample_iterator)
+# next(get_sample_iterator)
+# get_sample()
+# get_sample()
+# get_sample()
+# quit()
+
 
 def test_get_sample():
     sample = get_sample(123)

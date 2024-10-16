@@ -17,7 +17,7 @@ accelerate launch --config_file accelerate_config_machine_single.yaml --multi_gp
   train_cogvideox_lora.py \
   --num_train_epochs 300 \
   --checkpointing_steps 1000 \
-  --dataloader_num_workers 8 \
+  --dataloader_num_workers 0 \
   --gradient_checkpointing \
   --pretrained_model_name_or_path $MODEL_PATH \
   --cache_dir $CACHE_PATH \
