@@ -71,7 +71,7 @@ def get_sample_helper(index, debug=False):
     sample = ds.get_sample_from_delegator(
         index,
 
-        delegator_address='100.113.102.120', #videotrainer80gb
+        delegator_address='100.113.78.238', #videotrainer80gb
         
         sample_n_frames=49,
         sample_size=(480, 720),
@@ -91,7 +91,8 @@ def get_sample_helper(index, debug=False):
         noise_channels=16,
 
         # post_noise_alpha = rp.random_float(),
-        post_noise_alpha = 0, #LORA doesn't seem to be super affected by training...so I'll go as harsh as I can.
+        # post_noise_alpha = 0, #LORA doesn't seem to be super affected by training...so I'll go as harsh as I can.
+        post_noise_alpha = [0, 1], #Tells the dataset to choose a random number between 0 and 1
         
         delegator_timeout=None,
         csv_path = '/fsx_scanline/from_eyeline/ning_video_genai/datasets/ryan/webvid/webvid_gpt4v_caption_2065605_clean.csv',
@@ -1273,6 +1274,8 @@ def main(args):
 
                 # make sure to pop weight so that corresponding model is not saved again
                 weights.pop()
+
+            output_dir = rp.get_unique_copy_path(rp.make_directory(rp.path_join(output_dir,'saved_weights')))
 
             CogVideoXPipeline.save_lora_weights(
                 output_dir,

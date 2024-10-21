@@ -1,10 +1,10 @@
-export OUTPUT_SUFFIX="-lora-single-node-delegator-noisewarp-Oct15"
+export OUTPUT_SUFFIX="-lora-single-node-delegator-noisewarp-Oct16-RandomDegradation-LargerBatchSize-SmallLearnRate"
 
-export MODEL_PATH="THUDM/CogVideoX-2b"
-export OUTPUT_PATH="cogvideox2b$OUTPUT_SUFFIX"
+# export MODEL_PATH="THUDM/CogVideoX-2b"
+# export OUTPUT_PATH="cogvideox2b$OUTPUT_SUFFIX"
 
-# export MODEL_PATH="THUDM/CogVideoX-5b" 
-# export OUTPUT_PATH="cogvideox5b$OUTPUT_SUFFIX"
+export MODEL_PATH="THUDM/CogVideoX-5b" 
+export OUTPUT_PATH="cogvideox5b$OUTPUT_SUFFIX"
 
 # export DATASET_PATH="/root/CleanCode/Github/CogVideo/finetune/datasets/Disney-VideoGeneration-Dataset"
 export DATASET_PATH="/root/CleanCode/Github/CogVideo/finetune/datasets/Single-Sample-Disney-VideoGeneration-Dataset"
@@ -25,6 +25,8 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 # if you are not using wth 8 gus, change `accelerate_config_machine_single.yaml` num_processes as your gpu number
 accelerate launch --config_file accelerate_config_machine_single.yaml --multi_gpu \
   train_cogvideox_lora.py \
+  --train_batch_size 1 \
+  --gradient_accumulation_steps 8 \
   --num_train_epochs 30000 \
   --checkpointing_steps 200 \
   --dataloader_num_workers 0 \
@@ -51,9 +53,7 @@ accelerate launch --config_file accelerate_config_machine_single.yaml --multi_gp
   --max_num_frames 49 \
   --skip_frames_start 0 \
   --skip_frames_end 0 \
-  --train_batch_size 1 \
-  --gradient_accumulation_steps 1 \
-  --learning_rate 1e-3 \
+  --learning_rate 1e-4 \
   --lr_scheduler cosine_with_restarts \
   --lr_warmup_steps 200 \
   --lr_num_cycles 1 \
