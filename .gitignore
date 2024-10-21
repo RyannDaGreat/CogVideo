@@ -28,3 +28,10 @@ trash/models_huggingface/CogVideoX-5b
 *.safetensors
 *.mp4
 finetune/cogvideox2b-lora-single-node-delegator-noisewarp-Oct15
+finetune/cogvideox2b-lora-single-node-delegator-noisewarp-Oct16-RandomDegradation-LargerBatchSize
+finetune/cogvideox2b-lora-single-node-delegator-noisewarp-Oct16-RandomDegradation-LargerBatchSize-SmallLearnRate
+finetune/cogvideox5b-lora-single-node-delegator-noisewarp-Oct15
+finetune/cogvideox5b-lora-single-node-delegator-noisewarp-Oct16/checkpoint-200
+finetune/cogvideox5b-lora-single-node-delegator-noisewarp-Oct16-RandomDegradation
+finetune/cogvideox5b-lora-single-node-delegator-noisewarp-Oct16-RandomDegradation-LargerBatchSize
+finetune/cogvideox5b-lora-single-node-delegator-noisewarp-Oct16-RandomDegradation-LargerBatchSize-SmallLearnRate
