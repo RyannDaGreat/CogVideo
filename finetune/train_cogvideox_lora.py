@@ -17,6 +17,9 @@
 EXTRA_VALIDATION_EPOCHS = [2, 10, 20, 50] #Additional validations here. Don't use epoch 0 - I want to see if there are errors in training.
 EXTRA_VALIDATION_EPOCHS = [] #Additional validations here. Don't use epoch 0 - I want to see if there are errors in training.
 
+USE_BLENDED_NOISE = False
+NORMALIZE_BLENDED_NOISE = True #Only useful if USE_BLENDED_NOISE
+
 import argparse
 import logging
 import math
@@ -93,6 +96,7 @@ def get_sample_helper(index, debug=False):
         # post_noise_alpha = rp.random_float(),
         # post_noise_alpha = 0, #LORA doesn't seem to be super affected by training...so I'll go as harsh as I can.
         post_noise_alpha = [0, 1], #Tells the dataset to choose a random number between 0 and 1
+        # post_noise_alpha = [0, 1], #Tells the dataset to choose a random number between 0 and 1
         
         delegator_timeout=None,
         csv_path = '/fsx_scanline/from_eyeline/ning_video_genai/datasets/ryan/webvid/webvid_gpt4v_caption_2065605_clean.csv',
@@ -121,6 +125,16 @@ def get_sample_helper(index, debug=False):
         print(f'    • instance_noise.shape = {output.instance_noise.shape}')
     
     return output
+
+
+def downsamp_mean(x, l=13):
+    return torch.stack([rp.mean(u) for u in rp.split_into_n_sublists(x, l)])
+
+def normalized_noises(noises):
+    #Noises is in TCHW form
+    return torch.stack([x / x.std(1, keepdim=True) for x in noises])
+
+
 
 get_sample_iterator = rp.lazy_par_map(
     rp.squelch_wrap(get_sample_helper),
@@ -1531,7 +1545,12 @@ def main(args):
                 # # ic| model_input.shape: torch.Size([1, 13, 16, 60, 90])
                 # #     batch_noises.shape: torch.Size([49, 16, 60, 90])
                 # ...
-                batch_noises = rp.resize_list(batch_noises, model_input.shape[1])
+                if USE_BLENDED_NOISE:
+                    batch_noises = downsamp_mean(batch_noises, model_input.shape[1])
+                    if NORMALIZE_BLENDED_NOISE:
+                        batch_noises = normalized_n oises(batch_noises)
+                else:
+                    batch_noises = rp.resize_list(batch_noises, model_input.shape[1])
                 batch_noises = einops.rearrange(batch_noises, 'T H W C -> 1 T H W C')
                 batch_noises = batch_noises.to(model_input.dtype).to(model_input.device)
                 assert batch_noises.shape==model_input.shape, (batch_noises.shape, model_input.shape) 
