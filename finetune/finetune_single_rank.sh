@@ -1,4 +1,4 @@
-export OUTPUT_SUFFIX="-lora-noisewarp-Oct23-LORA2048-RandDegrad-BlendNoiseNorm"
+export OUTPUT_SUFFIX="-lora-noisewarp-Oct23-LORA2048-RandDegrad-BlendNoiseWithoutNorm"
 
 # export MODEL_PATH="THUDM/CogVideoX-2b"
 # export OUTPUT_PATH="cogvideox2b$OUTPUT_SUFFIX"

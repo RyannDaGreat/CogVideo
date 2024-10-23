@@ -18,7 +18,7 @@ EXTRA_VALIDATION_EPOCHS = [2, 10, 20, 50] #Additional validations here. Don't us
 EXTRA_VALIDATION_EPOCHS = [] #Additional validations here. Don't use epoch 0 - I want to see if there are errors in training.
 
 USE_BLENDED_NOISE = False
-NORMALIZE_BLENDED_NOISE = True #Only useful if USE_BLENDED_NOISE
+NORMALIZE_BLENDED_NOISE = False #Only useful if USE_BLENDED_NOISE
 
 import argparse
 import logging
