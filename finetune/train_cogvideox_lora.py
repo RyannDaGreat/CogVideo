@@ -1640,9 +1640,27 @@ def main(args):
                                     removing_checkpoint = os.path.join(args.output_dir, removing_checkpoint)
                                     shutil.rmtree(removing_checkpoint)
 
+                        #Avoiding errors like [rank4]:[E1022 00:28:39.302277749 ProcessGroupNCCL.cpp:1515] [PG 0 (default_pg) Rank 4] Process group watchdog thread terminated with exception: [Rank 4] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=49246, OpType=BROADCAST, NumelIn=5056, NumelOut=5
+                        #They always seemed to happen during storing checkpoints to NFS
+                        #According to https://github.com/huggingface/accelerate/issues/314, someone else encountered this bug during training
+                        #Saving to local storage then transferring in a separate process should hopefully alleviate this 
+
                         save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
-                        accelerator.save_state(save_path)
-                        logger.info(f"Saved state to {save_path}")
+
+                        temp_save_name = save_path.replace('/','~!~')
+                        temp_save_folder = rp.make_directory('/cogvid_lora_checkpoints')
+                        temp_save_path = rp.path_join(temp_save_folder, temp_save_name)
+                        
+                        import shlex
+                        accelerator.save_state(temp_save_path) #The only line in the original code
+                        logger.info(f"Saved state to {temp_save_path} - will be transferred to {save_path}")
+
+                        shell_command = f"""
+                            ( mv {shlex.quote(temp_save_path)} {shlex.quote(save_path)} && rm {shlex.quote(temp_save_path)} ) &
+                        """
+
+                        os.system(shell_command) #Try to move the file, and if you do, delete the old one
+
 
             logs = {"loss": loss.detach().item(), "lr": lr_scheduler.get_last_lr()[0]}
             progress_bar.set_postfix(**logs)
