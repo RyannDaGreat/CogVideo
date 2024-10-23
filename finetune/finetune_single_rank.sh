@@ -1,4 +1,4 @@
-export OUTPUT_SUFFIX="-lora-single-node-delegator-noisewarp-Oct16-RandomDegradation-LargerBatchSize-SmallLearnRate"
+export OUTPUT_SUFFIX="-lora-noisewarp-Oct23-LORA2048-RandDegrad-BlendNoiseNorm"
 
 # export MODEL_PATH="THUDM/CogVideoX-2b"
 # export OUTPUT_PATH="cogvideox2b$OUTPUT_SUFFIX"
@@ -15,8 +15,8 @@ export LORA_ALPHA=64
 
 #(LORA_ALPHA / RANK) = the lora's strength on a scale from 0 to 1
 #https://datascience.stackexchange.com/questions/123229/understanding-alpha-parameter-tuning-in-lora-paper
-export RANK=512
-export LORA_ALPHA=512
+export RANK=2048
+export LORA_ALPHA=2048
 
 #Idk what these do
 export CACHE_PATH="~/.cache"

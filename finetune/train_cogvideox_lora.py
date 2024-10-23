@@ -94,9 +94,8 @@ def get_sample_helper(index, debug=False):
         noise_channels=16,
 
         # post_noise_alpha = rp.random_float(),
-        # post_noise_alpha = 0, #LORA doesn't seem to be super affected by training...so I'll go as harsh as I can.
+        # post_noise_alpha = 0,
         post_noise_alpha = [0, 1], #Tells the dataset to choose a random number between 0 and 1
-        # post_noise_alpha = [0, 1], #Tells the dataset to choose a random number between 0 and 1
         
         delegator_timeout=None,
         csv_path = '/fsx_scanline/from_eyeline/ning_video_genai/datasets/ryan/webvid/webvid_gpt4v_caption_2065605_clean.csv',
@@ -1548,7 +1547,7 @@ def main(args):
                 if USE_BLENDED_NOISE:
                     batch_noises = downsamp_mean(batch_noises, model_input.shape[1])
                     if NORMALIZE_BLENDED_NOISE:
-                        batch_noises = normalized_n oises(batch_noises)
+                        batch_noises = normalized_noises(batch_noises)
                 else:
                     batch_noises = rp.resize_list(batch_noises, model_input.shape[1])
                 batch_noises = einops.rearrange(batch_noises, 'T H W C -> 1 T H W C')
@@ -1670,9 +1669,13 @@ def main(args):
                         temp_save_folder = rp.make_directory('/cogvid_lora_checkpoints')
                         temp_save_path = rp.path_join(temp_save_folder, temp_save_name)
                         
+                        rp.make_directory(rp.get_parent_folder(temp_save_path))
+                        rp.make_directory(rp.get_parent_folder(save_path))
+                        
                         import shlex
                         accelerator.save_state(temp_save_path) #The only line in the original code
                         logger.info(f"Saved state to {temp_save_path} - will be transferred to {save_path}")
+
 
                         shell_command = f"""
                             ( mv {shlex.quote(temp_save_path)} {shlex.quote(save_path)} && rm {shlex.quote(temp_save_path)} ) &
