@@ -37,3 +37,5 @@ finetune/cogvideox5b-lora-single-node-delegator-noisewarp-Oct16-RandomDegradatio
 finetune/cogvideox5b-lora-single-node-delegator-noisewarp-Oct16-RandomDegradation-LargerBatchSize-SmallLearnRate
 finetune/cogvideox5b-lora-single-node-delegator-noisewarp-Oct16-RandomDegradation-LargerBatchSize-SmallLearnRate-LORA4096-0Degrad/checkpoint-200
 finetune/cogvideox5b-lora-single-node-delegator-noisewarp-Oct16-RandomDegradation-LargerBatchSize-SmallLearnRate-LORA512-0Degrad
+
+finetune/cogvideox*
