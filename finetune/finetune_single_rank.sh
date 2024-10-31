@@ -1,4 +1,4 @@
-export OUTPUT_SUFFIX="-lora-noisewarp-Oct23-LORA2048-RandDegrad-BlendNoiseWithoutNorm"
+export OUTPUT_SUFFIX="--T2V5B_ENVATO___Oct31-LORA3584-RandDegrad-BlendNorm"
 
 # export MODEL_PATH="THUDM/CogVideoX-2b"
 # export OUTPUT_PATH="cogvideox2b$OUTPUT_SUFFIX"
@@ -15,12 +15,15 @@ export LORA_ALPHA=64
 
 #(LORA_ALPHA / RANK) = the lora's strength on a scale from 0 to 1
 #https://datascience.stackexchange.com/questions/123229/understanding-alpha-parameter-tuning-in-lora-paper
-export RANK=2048
-export LORA_ALPHA=2048
+export RANK=3584
+export LORA_ALPHA=3584
 
 #Idk what these do
 export CACHE_PATH="~/.cache"
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+  #Code cant handle this yet gotta fix the checkpoint saving hierarchy its pretty silly rn
+  # --resume_from_checkpoint "/root/CleanCode/Github/CogVideo/finetune/cogvideox5b-lora-noisewarp-Oct23-LORA2048-RandDegrad-BlendNoiseWithoutNorm/checkpoint-4800/saved_weights_copy" \
 
 # if you are not using wth 8 gus, change `accelerate_config_machine_single.yaml` num_processes as your gpu number
 accelerate launch --config_file accelerate_config_machine_single.yaml --multi_gpu \
@@ -51,7 +54,7 @@ accelerate launch --config_file accelerate_config_machine_single.yaml --multi_gp
   --width 720 \
   --fps 8 \
   --max_num_frames 49 \
-  --skip_frames_start 0 \
+  --skip_frames_start 0 \ 
   --skip_frames_end 0 \
   --learning_rate 1e-4 \
   --lr_scheduler cosine_with_restarts \

@@ -63,6 +63,8 @@ sys.path.append("/root/CleanCode/Github/AnimateDiff_Ning/animatediff/data")
 import dataset as ds
 
 
+DELEGATOR_ADDRESS = rp.load_text_file('/root/CleanCode/Github/AnimateDiff_Ning/animatediff/data/delegator_address.txt')
+
 def get_sample_helper(index, debug=False):
     rp.sleep(rp.random_int(1)) #Space them out to prevent errors? Idk....connection reset bs...maybe the webevaluator delegation server can be overloaded by too many requests at a time and just hangs up? I've never tested that??
 
@@ -74,7 +76,7 @@ def get_sample_helper(index, debug=False):
     sample = ds.get_sample_from_delegator(
         index,
 
-        delegator_address='100.113.78.238', #videotrainer80gb
+        delegator_address=DELEGATOR_ADDRESS, #videotrainer80gb
         
         sample_n_frames=49,
         sample_size=(480, 720),
@@ -98,7 +100,10 @@ def get_sample_helper(index, debug=False):
         post_noise_alpha = [0, 1], #Tells the dataset to choose a random number between 0 and 1
         
         delegator_timeout=None,
-        csv_path = '/fsx_scanline/from_eyeline/ning_video_genai/datasets/ryan/webvid/webvid_gpt4v_caption_2065605_clean.csv',
+
+        # csv_path = '/fsx_scanline/from_eyeline/ning_video_genai/datasets/ryan/webvid/webvid_gpt4v_caption_2065605_clean.csv',
+        csv_path="envato_caption_3869336_clean.csv",
+        video_folder="",
     )
     assert set(sample) <= set('text noise pixel_values'.split())
 
@@ -1480,7 +1485,8 @@ def main(args):
         initial_global_step = 0
     else:
         if args.resume_from_checkpoint != "latest":
-            path = os.path.basename(args.resume_from_checkpoint)
+            path = args.resume_from_checkpoint
+            rp.fansi_print(" ••••  USING CHECKPOINT PATH === "+str(path),'yellow','bold italic','dark red')
         else:
             # Get the mos recent checkpoint
             dirs = os.listdir(args.output_dir)
@@ -1497,7 +1503,7 @@ def main(args):
         else:
             accelerator.print(f"Resuming from checkpoint {path}")
             accelerator.load_state(os.path.join(args.output_dir, path))
-            global_step = int(path.split("-")[1])
+            global_step = int(path.split("-")[-1])
 
             initial_global_step = global_step
             first_epoch = global_step // num_update_steps_per_epoch
@@ -1544,12 +1550,15 @@ def main(args):
                 # # ic| model_input.shape: torch.Size([1, 13, 16, 60, 90])
                 # #     batch_noises.shape: torch.Size([49, 16, 60, 90])
                 # ...
-                if USE_BLENDED_NOISE:
-                    batch_noises = downsamp_mean(batch_noises, model_input.shape[1])
-                    if NORMALIZE_BLENDED_NOISE:
-                        batch_noises = normalized_noises(batch_noises)
-                else:
-                    batch_noises = rp.resize_list(batch_noises, model_input.shape[1])
+
+                #DONT COMMIT HARDCODING!!
+                # if USE_BLENDED_NOISE:
+                    # if NORMALIZE_BLENDED_NOISE:
+                batch_noises = downsamp_mean(batch_noises, model_input.shape[1])
+                batch_noises = normalized_noises(batch_noises)
+                # else:
+                #     batch_noises = rp.resize_list(batch_noises, model_input.shape[1])
+                rp.fansi_print(" ~~~~ HARDCODED BLEND NORMED NOISE! ~~~~ ",'green yellow','bold italic underlined','dark blue')
                 batch_noises = einops.rearrange(batch_noises, 'T H W C -> 1 T H W C')
                 batch_noises = batch_noises.to(model_input.dtype).to(model_input.device)
                 assert batch_noises.shape==model_input.shape, (batch_noises.shape, model_input.shape) 
